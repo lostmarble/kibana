@@ -161,10 +161,7 @@ define(function (require) {
      */
     Dispatch.prototype.allowBrushing = function () {
       var xAxis = this.handler.xAxis;
-      // Don't allow brushing for time based charts from non-time-based indices
-      var hasTimeField = this.handler.vis._attr.hasTimeField;
-
-      return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
+      return Boolean(xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
     };
 
     /**
@@ -229,8 +226,16 @@ define(function (require) {
      */
     Dispatch.prototype.highlightLegend = function (element) {
       var label = this.getAttribute('data-label');
+
       if (!label) return;
-      $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .filter(function (d, i) {
+          return String(d.label) !== label;
+        })
+        .classed('blur_shape', true);
     };
 
     /**
@@ -240,7 +245,10 @@ define(function (require) {
      * @method unHighlightLegend
      */
     Dispatch.prototype.unHighlightLegend = function (element) {
-      $('[data-label]', element.parentNode).css('opacity', 1);
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .classed('blur_shape', false);
     };
 
     /**

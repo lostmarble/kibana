@@ -70,6 +70,44 @@ define(function (require) {
           // make sure the the number of these aggs is above the min
           return metricCount > aggregation.schema.min;
         };
+        //TODO: include agg labels in params in Agg
+        function setAggLabels(){
+            if (!$scope.vis){
+                return;
+            }
+            if ($scope.vis.params.aggLabels === undefined){
+                $scope.vis.params.aggLabels={};
+                return;
+            }
+
+            var aggLabels = $scope.vis.params.aggLabels;
+            var firstSibling = $scope;
+
+            //find the first sibling(scope)
+            while (firstSibling.$$prevSibling !== null) {
+                firstSibling = firstSibling.$$prevSibling;
+            }
+
+            var sibling = firstSibling;
+            //Travel all siblings setting agg label
+            while (sibling !== null) {
+                if (sibling.agg) {
+                    sibling.agg_label = aggLabels[sibling.agg.id-1];
+                }
+                sibling = sibling.$$nextSibling;
+            }
+        }
+
+        setAggLabels();//Fill with saved labels the metric labels forms
+
+        $scope.showFormLabel = function(){
+            $scope.vis.params.aggLabels[$scope.agg.id - 1] = $scope.agg_label;
+
+            $scope.showAggLabel = !$scope.showAggLabel;
+            //TODO: Hack, labels should be params so viz.dirty is auto changed
+            $scope.vis.dirty = true;
+        }
+
 
         function calcAggIsTooLow() {
           if (!$scope.agg.schema.mustBeFirst) {

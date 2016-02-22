@@ -12,7 +12,7 @@ define(function (require) {
         vis: '=',
       },
       link: function ($scope, $el) {
-        var $optionContainer = $el.find('.visualization-options');
+        var $optionContainer = $('.visualization-options');
         var $editor = $compile($scope.vis.type.params.editor)($scope);
         $optionContainer.append($editor);
 

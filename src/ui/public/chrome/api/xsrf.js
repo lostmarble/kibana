@@ -4,12 +4,12 @@ import { set } from 'lodash';
 export default function (chrome, internals) {
 
   chrome.getXsrfToken = function () {
-    return internals.version;
+    return internals.xsrfToken;
   };
 
-  $.ajaxPrefilter(function ({ kbnXsrfToken = true }, originalOptions, jqXHR) {
+  $.ajaxPrefilter(function ({ kbnXsrfToken = internals.xsrfToken }, originalOptions, jqXHR) {
     if (kbnXsrfToken) {
-      jqXHR.setRequestHeader('kbn-version', internals.version);
+      jqXHR.setRequestHeader('kbn-xsrf-token', kbnXsrfToken);
     }
   });
 
@@ -17,9 +17,9 @@ export default function (chrome, internals) {
     $httpProvider.interceptors.push(function () {
       return {
         request: function (opts) {
-          const { kbnXsrfToken = true } = opts;
+          const { kbnXsrfToken = internals.xsrfToken } = opts;
           if (kbnXsrfToken) {
-            set(opts, ['headers', 'kbn-version'], internals.version);
+            set(opts, ['headers', 'kbn-xsrf-token'], kbnXsrfToken);
           }
           return opts;
         }

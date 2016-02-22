@@ -6,7 +6,6 @@ define(function (require) {
 
   require('ui/visualize');
   require('ui/collapsible_sidebar');
-  require('ui/share');
 
   require('ui/routes')
   .when('/visualize/create', {
@@ -50,7 +49,7 @@ define(function (require) {
 
     var angular = require('angular');
     var ConfigTemplate = require('ui/ConfigTemplate');
-    var Notifier = require('ui/notify/notifier');
+    var Notifier = require('ui/notify/Notifier');
     var docTitle = Private(require('ui/doc_title'));
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -233,6 +232,15 @@ define(function (require) {
           kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
         }
       }, notify.fatal);
+    };
+
+    $scope.shareData = function () {
+      return {
+        link: $location.absUrl(),
+        // This sucks, but seems like the cleanest way. Uhg.
+        embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
+          '" height="600" width="800"></iframe>'
+      };
     };
 
     $scope.unlink = function () {

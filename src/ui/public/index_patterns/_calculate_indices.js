@@ -31,7 +31,8 @@ define(function (require) {
     // given time range
     function calculateIndices(pattern, timeFieldName, start, stop, sortDirection) {
       return getFieldStats(pattern, timeFieldName, start, stop)
-      .then(resp => omitIndicesWithoutTimeField(resp.indices, timeFieldName))
+      .then(resp => resp.indices)
+      .then(indices => omitIndicesWithoutTimeField(indices, timeFieldName))
       .then(indices => sortIndexStats(indices, timeFieldName, sortDirection));
     };
 
@@ -59,27 +60,19 @@ define(function (require) {
     }
 
     function sortIndexStats(indices, timeFieldName, sortDirection) {
-      const desc = sortDirection === 'desc';
-      const leader = desc ? 'max' : 'min';
+      if (!sortDirection) return _.keys(indices);
 
-      let indexDetails = _(indices).map((stats, index) => {
-        const field = stats.fields[timeFieldName];
+      // FIXME: Once https://github.com/elastic/elasticsearch/issues/14404 is closed
+      // this should be sorting based on the sortable value of a field.
+      const edgeKey = sortDirection === 'desc' ? 'max_value' : 'min_value';
 
-        // TODO: remove when we get to es 2.2, see elastic/elasticsearch#14404
-        let min = field.min_value;
-        if (typeof min === 'string') min = moment(min).valueOf();
-
-        let max = field.max_value;
-        if (typeof max === 'string') max = moment(max).valueOf();
-
-        return { index, min, max };
-      });
-
-      if (sortDirection) {
-        indexDetails = indexDetails.sortByOrder([leader], [sortDirection]);
-      }
-
-      return indexDetails.value();
+      return _(indices)
+      .map((stats, index) => (
+        { index, edge: stats.fields[timeFieldName][edgeKey] }
+      ))
+      .sortByOrder(['edge'], [sortDirection])
+      .pluck('index')
+      .value();
     }
 
     return calculateIndices;

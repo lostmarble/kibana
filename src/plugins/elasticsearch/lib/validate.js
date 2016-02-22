@@ -1,9 +1,10 @@
+'use strict';
+
 var _ = require('lodash');
 var parse = require('url').parse;
 
 validate.Fail = function (index) {
-  this.message = 'Kibana only support modifying the "' + index +
-  '" index. Requests that might modify other indicies are not sent to elasticsearch.';
+  this.message = 'Kibana only support modifying the "' + index + '" index. Requests that might modify other indicies are not sent to elasticsearch.';
 };
 
 validate.BadIndex = function (index) {
@@ -20,8 +21,8 @@ function validate(server, req) {
   var maybeIndex = _.first(segments);
   var maybeMethod = _.last(segments);
 
-  var add = (method === 'POST' || method === 'PUT');
-  var rem = (method === 'DELETE');
+  var add = method === 'POST' || method === 'PUT';
+  var rem = method === 'DELETE';
 
   // everything below this point assumes a destructive request of some sort
   if (!add && !rem) throw new validate.Fail(config.get('kibana.index'));
@@ -31,19 +32,18 @@ function validate(server, req) {
   var bulkBody = bodyStr && parseBulk(bodyStr);
 
   // methods that accept standard json bodies
-  var maybeMGet = ('_mget' === maybeMethod && add && jsonBody);
-  var maybeSearch = ('_search' === maybeMethod && add);
-  var maybeValidate = ('_validate' === maybeMethod && add);
+  var maybeMGet = '_mget' === maybeMethod && add && jsonBody;
+  var maybeSearch = '_search' === maybeMethod && add;
+  var maybeValidate = '_validate' === maybeMethod && add;
 
   // methods that accept bulk bodies
-  var maybeBulk = ('_bulk' === maybeMethod && add && bulkBody);
-  var maybeMsearch = ('_msearch' === maybeMethod && add && bulkBody);
+  var maybeBulk = '_bulk' === maybeMethod && add && bulkBody;
+  var maybeMsearch = '_msearch' === maybeMethod && add && bulkBody;
 
   // indication that this request is against kibana
-  var maybeKibanaIndex = (maybeIndex === config.get('kibana.index'));
+  var maybeKibanaIndex = maybeIndex === config.get('kibana.index');
 
-  if (!maybeBulk) validateNonBulkDestructive();
-  else validateBulkBody(bulkBody);
+  if (!maybeBulk) validateNonBulkDestructive();else validateBulkBody(bulkBody);
 
   return true;
 
@@ -59,7 +59,7 @@ function validate(server, req) {
     var parts = str.split(/\r?\n/);
 
     var finalLine = parts.pop();
-    var evenJsons = (parts.length % 2 === 0);
+    var evenJsons = parts.length % 2 === 0;
 
     if (finalLine !== '' || !evenJsons) return;
 
@@ -92,15 +92,15 @@ function validate(server, req) {
 
   function validateBulkBody(toValidate) {
     while (toValidate.length) {
-      let header = toValidate.shift();
-      let body = toValidate.shift();
+      var header = toValidate.shift();
+      var body = toValidate.shift();
 
-      let op = _.keys(header).join('');
-      let meta = header[op];
+      var op = _.keys(header).join('');
+      var meta = header[op];
 
       if (!meta) throw new validate.Fail(config.get('kibana.index'));
 
-      let index = meta._index || maybeIndex;
+      var index = meta._index || maybeIndex;
       if (index !== config.get('kibana.index')) {
         throw new validate.BadIndex(index);
       }
@@ -109,4 +109,3 @@ function validate(server, req) {
 }
 
 module.exports = validate;
-

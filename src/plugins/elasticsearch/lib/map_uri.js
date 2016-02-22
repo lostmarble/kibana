@@ -1,3 +1,5 @@
+'use strict';
+
 var querystring = require('querystring');
 var resolve = require('url').resolve;
 module.exports = function mapUri(server, prefix) {

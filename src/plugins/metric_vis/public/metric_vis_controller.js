@@ -1,5 +1,4 @@
 define(function (require) {
-  var _ = require('lodash');
   // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
   var module = require('ui/modules').get('kibana/metric_vis', ['kibana']);
@@ -9,21 +8,17 @@ define(function (require) {
 
     var metrics = $scope.metrics = [];
 
-    function isInvalid(val) {
-      return _.isUndefined(val) || _.isNull(val) || _.isNaN(val);
-    }
-
     $scope.processTableGroups = function (tableGroups) {
       tableGroups.tables.forEach(function (table) {
         table.columns.forEach(function (column, i) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
-          var value = table.rows[0][i];
-
-          value = isInvalid(value) ? '?' : fieldFormatter(value);
-
+          var title;
+          if ($scope.vis && $scope.vis.params.aggLabels){
+            title=$scope.vis.params.aggLabels[i];
+            }
           metrics.push({
             label: column.title,
-            value: value
+            value: fieldFormatter(table.rows[0][i])
           });
         });
       });

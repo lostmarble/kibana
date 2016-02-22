@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var Boom = require('boom');
 var Promise = require('bluebird');
@@ -10,8 +12,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
 
   var pid = String(process.pid);
 
-  return writeFile(path, pid, { flag: 'wx' })
-  .catch(function (err) {
+  return writeFile(path, pid, { flag: 'wx' })['catch'](function (err) {
     if (err.code !== 'EEXIST') throw err;
 
     var log = {
@@ -27,8 +28,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
     }
 
     return writeFile(path, pid);
-  })
-  .then(function () {
+  }).then(function () {
 
     server.log(['pid', 'debug'], {
       tmpl: 'wrote pid file to <%= path %>',
@@ -41,7 +41,8 @@ module.exports = Promise.method(function (kbnServer, server, config) {
     });
 
     process.once('exit', clean); // for "natural" exits
-    process.once('SIGINT', function () { // for Ctrl-C exits
+    process.once('SIGINT', function () {
+      // for Ctrl-C exits
       clean();
 
       // resend SIGINT

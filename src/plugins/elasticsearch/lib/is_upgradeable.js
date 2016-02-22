@@ -1,3 +1,5 @@
+'use strict';
+
 var semver = require('semver');
 var utils = require('requirefrom')('src/utils');
 var rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;

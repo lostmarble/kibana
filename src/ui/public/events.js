@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var Notifier = require('ui/notify/notifier');
+  var Notifier = require('ui/notify/Notifier');
 
   return function EventsProvider(Private, Promise) {
     var SimpleEmitter = require('ui/utils/SimpleEmitter');

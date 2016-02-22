@@ -66,7 +66,6 @@ define(function (require) {
     Vis.prototype.type = 'histogram';
 
     Vis.prototype.setState = function (state) {
-      this.title = state.title || '';
       this.type = state.type || this.type;
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
@@ -81,7 +80,6 @@ define(function (require) {
 
     Vis.prototype.getState = function () {
       return {
-        title: this.title,
         type: this.type.name,
         params: this.params,
         aggs: this.aggs.map(function (agg) {

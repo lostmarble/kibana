@@ -1,3 +1,5 @@
+'use strict';
+
 require('brace');
 require('brace/mode/json');
 require('node_modules/@spalger/ui-ace/ui-ace');

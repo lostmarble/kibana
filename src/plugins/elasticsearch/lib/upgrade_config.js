@@ -1,3 +1,5 @@
+'use strict';
+
 var Promise = require('bluebird');
 var isUpgradeable = require('./is_upgradeable');
 var _ = require('lodash');
@@ -54,4 +56,3 @@ module.exports = function (server) {
     });
   };
 };
-

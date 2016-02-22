@@ -1,3 +1,5 @@
+'use strict';
+
 var cloneDeep = require('lodash').cloneDeep;
 var fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
@@ -11,4 +13,6 @@ exports.webpack = {
   optional: ['runtime']
 };
 
-exports.node = cloneDeep(exports.webpack);
+exports.node = cloneDeep({
+  ignore: [fromRoot('src'), /[\\\/](node_modules|bower_components)[\\\/]/]
+}, exports.webpack);

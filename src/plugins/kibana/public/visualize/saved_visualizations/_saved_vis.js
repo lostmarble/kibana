@@ -103,7 +103,6 @@ define(function (require) {
         self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
       }
 
-      self.visState.title = self.title;
       self.vis = new Vis(
         self.searchSource.get('index'),
         self.visState
@@ -116,7 +115,6 @@ define(function (require) {
       var self = this;
 
       self.vis.indexPattern = self.searchSource.get('index');
-      self.visState.title = self.title;
       self.vis.setState(self.visState);
     };
 

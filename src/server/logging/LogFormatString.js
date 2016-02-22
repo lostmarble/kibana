@@ -1,20 +1,22 @@
-let _ = require('lodash');
-let ansicolors = require('ansicolors');
-let moment = require('moment');
+'use strict';
 
-let LogFormat = require('./LogFormat');
+var _get = require('babel-runtime/helpers/get')['default'];
 
-let statuses = [
-  'err',
-  'info',
-  'error',
-  'warning',
-  'fatal',
-  'status',
-  'debug'
-];
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-let typeColors = {
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _ = require('lodash');
+var ansicolors = require('ansicolors');
+var moment = require('moment');
+
+var LogFormat = require('./LogFormat');
+
+var statuses = ['err', 'info', 'error', 'warning', 'fatal', 'status', 'debug'];
+
+var typeColors = {
   log: 'blue',
   req: 'green',
   res: 'green',
@@ -32,31 +34,42 @@ let typeColors = {
   listening: 'magenta'
 };
 
-let color = _.memoize(function (name) {
+var color = _.memoize(function (name) {
   return ansicolors[typeColors[name]] || _.identity;
 });
 
-let type = _.memoize(function (t) {
+var type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
-let workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
+var workerType = process.env.kbnWorkerType ? type(process.env.kbnWorkerType) + ' ' : '';
 
-module.exports = class KbnLoggerJsonFormat extends LogFormat {
-  format(data) {
-    let time = color('time')(moment(data.timestamp).format('HH:mm:ss.SSS'));
-    let msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
+module.exports = (function (_LogFormat) {
+  _inherits(KbnLoggerJsonFormat, _LogFormat);
 
-    let tags = _(data.tags)
-    .sortBy(function (tag) {
-      if (color(tag) === _.identity) return `2${tag}`;
-      if (_.includes(statuses, tag)) return `0${tag}`;
-      return `1${tag}`;
-    })
-    .reduce(function (s, t) {
-      return s + `[${ color(t)(t) }]`;
-    }, '');
+  function KbnLoggerJsonFormat() {
+    _classCallCheck(this, KbnLoggerJsonFormat);
 
-    return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
+    _get(Object.getPrototypeOf(KbnLoggerJsonFormat.prototype), 'constructor', this).apply(this, arguments);
   }
-};
+
+  _createClass(KbnLoggerJsonFormat, [{
+    key: 'format',
+    value: function format(data) {
+      var time = color('time')(moment(data.timestamp).format('HH:mm:ss.SSS'));
+      var msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
+
+      var tags = _(data.tags).sortBy(function (tag) {
+        if (color(tag) === _.identity) return '2' + tag;
+        if (_.includes(statuses, tag)) return '0' + tag;
+        return '1' + tag;
+      }).reduce(function (s, t) {
+        return s + ('[' + color(t)(t) + ']');
+      }, '');
+
+      return '' + workerType + type(data.type) + ' [' + time + '] ' + tags + ' ' + msg;
+    }
+  }]);
+
+  return KbnLoggerJsonFormat;
+})(LogFormat);

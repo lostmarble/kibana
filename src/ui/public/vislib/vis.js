@@ -39,13 +39,25 @@ define(function (require) {
       this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
+    Vis.prototype._translateObj = function(obj,dict,depth){
+        if(depth>4)return;
+        for (var a in obj){
+            if(typeof(obj[a])=="object"){
+                this._translateObj(obj[a],dict,depth+1);
+            }
+            else if (dict[obj[a]]) {
+                obj[a]=dict[obj[a]];
+            }
+        }
+    }
+
     /**
      * Renders the visualization
      *
      * @method render
      * @param data {Object} Elasticsearch query results
      */
-    Vis.prototype.render = function (data, uiState) {
+    Vis.prototype.render = function (data) {
       var chartType = this._attr.type;
 
       if (!data) {
@@ -57,13 +69,13 @@ define(function (require) {
         this._runOnHandler('destroy');
       }
 
-      this.data = data;
-
-      if (!this.uiState) {
-        this.uiState = uiState;
-        uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
+      var sl = this._attr.legendLabel;
+      if(sl){
+          var legendLabels = JSON.parse(sl);
+          this._translateObj(data,legendLabels,1);
       }
 
+      this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
     };
@@ -82,7 +94,7 @@ define(function (require) {
       if (this.handler && _.isFunction(this.handler.resize)) {
         this._runOnHandler('resize');
       } else {
-        this.render(this.data, this.uiState);
+        this.render(this.data);
       }
     };
 
@@ -119,7 +131,6 @@ define(function (require) {
 
       this.binder.destroy();
       this.resizeChecker.destroy();
-      if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
@@ -135,7 +146,7 @@ define(function (require) {
      */
     Vis.prototype.set = function (name, val) {
       this._attr[name] = val;
-      this.render(this.data, this.uiState);
+      this.render(this.data);
     };
 
     /**

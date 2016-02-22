@@ -1,58 +1,108 @@
+'use strict';
 
-let { fromNode } = require('bluebird');
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-module.exports = class WeirdControlFlow {
-  constructor(work) {
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _getIterator = require('babel-runtime/core-js/get-iterator')['default'];
+
+var _require = require('bluebird');
+
+var fromNode = _require.fromNode;
+
+module.exports = (function () {
+  function WeirdControlFlow(work) {
+    _classCallCheck(this, WeirdControlFlow);
+
     this.handlers = [];
   }
 
-  get() {
-    return fromNode(cb => {
-      if (this.ready) return cb();
-      this.handlers.push(cb);
-      this.start();
-    });
-  }
+  _createClass(WeirdControlFlow, [{
+    key: 'get',
+    value: function get() {
+      var _this = this;
 
-  work(work) {
-    this._work = work;
-    this.stop();
-
-    if (this.handlers.length) {
-      this.start();
+      return fromNode(function (cb) {
+        if (_this.ready) return cb();
+        _this.handlers.push(cb);
+        _this.start();
+      });
     }
-  }
+  }, {
+    key: 'work',
+    value: function work(_work) {
+      this._work = _work;
+      this.stop();
 
-  start() {
-    if (this.running) return;
-    this.stop();
-    if (this._work) {
-      this.running = true;
-      this._work();
+      if (this.handlers.length) {
+        this.start();
+      }
     }
-  }
-
-  stop() {
-    this.ready = false;
-    this.error = false;
-    this.running = false;
-  }
-
-  success(...args) {
-    this.stop();
-    this.ready = true;
-    this._flush(args);
-  }
-
-  failure(err) {
-    this.stop();
-    this.error = err;
-    this._flush([err]);
-  }
-
-  _flush(args) {
-    for (let fn of this.handlers.splice(0)) {
-      fn.apply(null, args);
+  }, {
+    key: 'start',
+    value: function start() {
+      if (this.running) return;
+      this.stop();
+      if (this._work) {
+        this.running = true;
+        this._work();
+      }
     }
-  }
-};
+  }, {
+    key: 'stop',
+    value: function stop() {
+      this.ready = false;
+      this.error = false;
+      this.running = false;
+    }
+  }, {
+    key: 'success',
+    value: function success() {
+      this.stop();
+      this.ready = true;
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      this._flush(args);
+    }
+  }, {
+    key: 'failure',
+    value: function failure(err) {
+      this.stop();
+      this.error = err;
+      this._flush([err]);
+    }
+  }, {
+    key: '_flush',
+    value: function _flush(args) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = _getIterator(this.handlers.splice(0)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var fn = _step.value;
+
+          fn.apply(null, args);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+  }]);
+
+  return WeirdControlFlow;
+})();

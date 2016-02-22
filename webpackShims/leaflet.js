@@ -1,3 +1,5 @@
+'use strict';
+
 require('node_modules/leaflet/dist/leaflet.css');
 window.L = module.exports = require('node_modules/leaflet/dist/leaflet');
 

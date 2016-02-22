@@ -9,10 +9,9 @@ define(function (require) {
      * @param {Vis} vis - the vis object that contains all configuration data required to render the vis
      * @param {jQuery<DOMElement>} $el - a jQuery wrapped element to render into
      */
-    function Renderbot(vis, $el, uiState) {
+    function Renderbot(vis, $el) {
       this.vis = vis;
       this.$el = $el;
-      this.uiState = uiState;
     }
 
     /**

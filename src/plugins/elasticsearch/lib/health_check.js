@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var Promise = require('bluebird');
 var elasticsearch = require('elasticsearch');
@@ -16,7 +18,7 @@ module.exports = function (plugin, server) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitForPong() {
-    return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+    return client.ping({ requestTimeout: 1500 })['catch'](function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s. Retrying in 2.5 seconds.', config.get('elasticsearch.url')));
@@ -30,8 +32,7 @@ module.exports = function (plugin, server) {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
-    })
-    .then(function (resp) {
+    }).then(function (resp) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
       if (!resp || resp.timed_out) {
@@ -52,11 +53,9 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    return waitForPong()
-    .then(_.partial(checkEsVersion, server))
-    .then(waitForShards)
-    .then(_.partial(migrateConfig, server))
-    .catch(err => plugin.status.red(err));
+    return waitForPong().then(_.partial(checkEsVersion, server)).then(waitForShards).then(_.partial(migrateConfig, server))['catch'](function (err) {
+      return plugin.status.red(err);
+    });
   }
 
   var timeoutId = null;
@@ -65,7 +64,7 @@ module.exports = function (plugin, server) {
     if (timeoutId) return;
 
     var myId = setTimeout(function () {
-      check().finally(function () {
+      check()['finally'](function () {
         if (timeoutId === myId) startorRestartChecking();
       });
     }, ms);
@@ -88,7 +87,8 @@ module.exports = function (plugin, server) {
     run: check,
     start: startorRestartChecking,
     stop: stopChecking,
-    isRunning: function () { return !!timeoutId; },
+    isRunning: function isRunning() {
+      return !!timeoutId;
+    }
   };
-
 };

@@ -1,6 +1,12 @@
+'use strict';
+
+var _Map = require('babel-runtime/core-js/map')['default'];
+
 var url = require('url');
 var _ = require('lodash');
-var readFile = (file) => require('fs').readFileSync(file, 'utf8');
+var readFile = function readFile(file) {
+  return require('fs').readFileSync(file, 'utf8');
+};
 var http = require('http');
 var https = require('https');
 
@@ -29,4 +35,4 @@ module.exports = _.memoize(function (server) {
 
 // See https://lodash.com/docs#memoize: We use a Map() instead of the default, because we want the keys in the cache
 // to be the server objects, and by default these would be coerced to strings as keys (which wouldn't be useful)
-module.exports.cache = new Map();
+module.exports.cache = new _Map();

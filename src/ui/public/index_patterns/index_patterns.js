@@ -2,7 +2,7 @@ define(function (require) {
   var module = require('ui/modules').get('kibana/index_patterns');
   require('ui/filters/short_dots');
 
-  function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
+  module.service('indexPatterns', function (es, Notifier, Private, Promise, kbnIndex) {
     var self = this;
     var _ = require('lodash');
     var errors = require('ui/errors');
@@ -25,8 +25,7 @@ define(function (require) {
 
     self.delete = function (pattern) {
       self.getIds.clearCache();
-      pattern.destroy();
-
+      patternCache.delete(pattern.id);
       return es.delete({
         index: kbnIndex,
         type: 'index-pattern',
@@ -45,8 +44,5 @@ define(function (require) {
     self.patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
     self.fieldFormats = Private(require('ui/registry/field_formats'));
     self.IndexPattern = IndexPattern;
-  }
-
-  module.service('indexPatterns', Private => Private(IndexPatternsProvider));
-  return IndexPatternsProvider;
+  });
 });

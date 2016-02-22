@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function (kibana) {
   return new kibana.Plugin({
     uiExports: {
@@ -7,11 +9,7 @@ module.exports = function (kibana) {
         hidden: true,
         url: '/status',
 
-        autoload: [].concat(
-          kibana.autoload.styles,
-          'ui/chrome',
-          'angular'
-        )
+        autoload: [].concat(kibana.autoload.styles, 'ui/chrome', 'angular')
       }
     }
   });

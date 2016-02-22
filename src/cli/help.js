@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 
 module.exports = function (command, spaces) {
@@ -5,25 +7,14 @@ module.exports = function (command, spaces) {
     return command.outputHelp();
   }
 
-  let defCmd = _.find(command.commands, function (cmd) {
+  var defCmd = _.find(command.commands, function (cmd) {
     return cmd._name === 'serve';
   });
 
-  let desc = !command.description() ? '' : command.description();
-  let cmdDef = !defCmd ? '' : `=${defCmd._name}`;
+  var desc = !command.description() ? '' : command.description();
+  var cmdDef = !defCmd ? '' : '=' + defCmd._name;
 
-  return (
-`
-Usage: ${command._name} [command${cmdDef}] [options]
-
-${desc}
-
-Commands:
-${indent(commandsSummary(command), 2)}
-
-${cmdHelp(defCmd)}
-`
-  ).trim().replace(/^/gm, spaces || '');
+  return ('\nUsage: ' + command._name + ' [command' + cmdDef + '] [options]\n\n' + desc + '\n\nCommands:\n' + indent(commandsSummary(command), 2) + '\n\n' + cmdHelp(defCmd) + '\n').trim().replace(/^/gm, spaces || '');
 };
 
 function indent(str, n) {
@@ -31,41 +22,29 @@ function indent(str, n) {
 }
 
 function commandsSummary(program) {
-  let cmds = _.compact(program.commands.map(function (cmd) {
-    let name = cmd._name;
+  var cmds = _.compact(program.commands.map(function (cmd) {
+    var name = cmd._name;
     if (name === '*') return;
-    let opts = cmd.options.length ? ' [options]' : '';
-    let args = cmd._args.map(function (arg) {
+    var opts = cmd.options.length ? ' [options]' : '';
+    var args = cmd._args.map(function (arg) {
       return humanReadableArgName(arg);
     }).join(' ');
 
-    return [
-      `${name} ${opts} ${args}`,
-      cmd.description()
-    ];
+    return [name + ' ' + opts + ' ' + args, cmd.description()];
   }));
 
-  let cmdLColWidth = cmds.reduce(function (width, cmd) {
+  var cmdLColWidth = cmds.reduce(function (width, cmd) {
     return Math.max(width, cmd[0].length);
   }, 0);
 
   return cmds.reduce(function (help, cmd) {
-    return `${help || ''}${_.padRight(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
+    return '' + (help || '') + _.padRight(cmd[0], cmdLColWidth) + ' ' + (cmd[1] || '') + '\n';
   }, '');
 }
 
 function cmdHelp(cmd) {
   if (!cmd) return '';
-  return (
-
-`
-"${cmd._name}" Options:
-
-${indent(cmd.optionHelp(), 2)}
-`
-
-  ).trim();
-
+  return ('\n"' + cmd._name + '" Options:\n\n' + indent(cmd.optionHelp(), 2) + '\n').trim();
 }
 
 function humanReadableArgName(arg) {

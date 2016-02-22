@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 module.exports = function (dot, flatObject) {
   var fullObject = {};
@@ -11,9 +13,7 @@ module.exports = function (dot, flatObject) {
         if (!memo[_key]) memo[_key] = {};
         walk(memo[_key], keys, value);
       }
-    }(fullObject, keys, value));
+    })(fullObject, keys, value);
   });
   return fullObject;
 };
-
-

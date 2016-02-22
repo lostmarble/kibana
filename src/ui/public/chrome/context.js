@@ -4,7 +4,6 @@ define(function (require) {
 
   require('ui/modules')
   .get('kibana')
-  // TODO: all of this really belongs in the timepicker
   .directive('chromeContext', function (timefilter, globalState) {
 
     var listenForUpdates = _.once(function ($scope) {

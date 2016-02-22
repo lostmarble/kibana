@@ -1,31 +1,22 @@
-let _ = require('lodash');
-let Command = require('commander').Command;
+'use strict';
 
-let red = require('./color').red;
-let yellow = require('./color').yellow;
-let help = require('./help');
+var _ = require('lodash');
+var Command = require('commander').Command;
+
+var red = require('./color').red;
+var yellow = require('./color').yellow;
+var help = require('./help');
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;
 
-  console.log(
-`
-${red(' ERROR ')} ${err}
-
-${help(this, '  ')}
-`
-  );
+  console.log('\n' + red(' ERROR ') + ' ' + err + '\n\n' + help(this, '  ') + '\n');
 
   process.exit(64); // eslint-disable-line no-process-exit
 };
 
 Command.prototype.defaultHelp = function () {
-  console.log(
-`
-${help(this, '  ')}
-
-`
-  );
+  console.log('\n' + help(this, '  ') + '\n\n');
 
   process.exit(64); // eslint-disable-line no-process-exit
 };
@@ -40,30 +31,33 @@ Command.prototype.unknownArgv = function (argv) {
  * @return {[type]} [description]
  */
 Command.prototype.collectUnknownOptions = function () {
-  let title = `Extra ${this._name} options`;
+  var title = 'Extra ' + this._name + ' options';
 
   this.allowUnknownOption();
   this.getUnknownOptions = function () {
-    let opts = {};
-    let unknowns = this.unknownArgv();
+    var opts = {};
+    var unknowns = this.unknownArgv();
 
     while (unknowns.length) {
-      let opt = unknowns.shift().split('=');
+      var opt = unknowns.shift().split('=');
       if (opt[0].slice(0, 2) !== '--') {
-        this.error(`${title} "${opt[0]}" must start with "--"`);
+        this.error(title + ' "' + opt[0] + '" must start with "--"');
       }
 
       if (opt.length === 1) {
         if (!unknowns.length || unknowns[0][0] === '-') {
-          this.error(`${title} "${opt[0]}" must have a value`);
+          this.error(title + ' "' + opt[0] + '" must have a value');
         }
 
         opt.push(unknowns.shift());
       }
 
-      let val = opt[1];
-      try { val = JSON.parse(opt[1]); }
-      catch (e) { val = opt[1]; }
+      var val = opt[1];
+      try {
+        val = JSON.parse(opt[1]);
+      } catch (e) {
+        val = opt[1];
+      }
 
       _.set(opts, opt[0].slice(2), val);
     }
@@ -75,13 +69,17 @@ Command.prototype.collectUnknownOptions = function () {
 };
 
 Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function (parse, argv) {
-  let opts = parse.call(this, argv);
+  var opts = parse.call(this, argv);
   this.unknownArgv(opts.unknown);
   return opts;
 });
 
 Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
-  return action.call(this, function (...args) {
+  return action.call(this, function () {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
     var ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
       ret.then(null, function (e) {

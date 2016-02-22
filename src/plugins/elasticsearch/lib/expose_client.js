@@ -1,6 +1,10 @@
+'use strict';
+
 var elasticsearch = require('elasticsearch');
 var _ = require('lodash');
-var readFile = (file) => require('fs').readFileSync(file, 'utf8');
+var readFile = function readFile(file) {
+  return require('fs').readFileSync(file, 'utf8');
+};
 var util = require('util');
 var url = require('url');
 var callWithRequest = require('./call_with_request');
@@ -43,7 +47,7 @@ module.exports = function (server) {
       ssl: ssl,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
-      log: function () {
+      log: function log() {
         this.error = function (err) {
           server.log(['error', 'elasticsearch'], err);
         };
@@ -67,8 +71,6 @@ module.exports = function (server) {
   server.expose('client', client);
   server.expose('createClient', createClient);
   server.expose('callWithRequest', callWithRequest(noAuthClient));
-  server.expose('errors', elasticsearch.errors);
 
   return client;
-
 };

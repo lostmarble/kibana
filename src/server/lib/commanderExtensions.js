@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function (program) {
   function isCommand(val) {
     return typeof val === 'object' && val._name;

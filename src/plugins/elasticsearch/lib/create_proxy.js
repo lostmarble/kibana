@@ -1,11 +1,17 @@
+'use strict';
+
 var createAgent = require('./create_agent');
 var mapUri = require('./map_uri');
-var { resolve } = require('url');
+
+var _require = require('url');
+
+var resolve = _require.resolve;
+
 module.exports = function createProxy(server, method, route, config) {
 
   var pre = '/elasticsearch';
   var sep = route[0] === '/' ? '' : '/';
-  var path = `${pre}${sep}${route}`;
+  var path = '' + pre + sep + route;
   var options = {
     method: method,
     path: path,
@@ -16,11 +22,10 @@ module.exports = function createProxy(server, method, route, config) {
         agent: createAgent(server),
         xforward: true
       }
-    },
+    }
   };
 
   if (config) options.config = config;
 
   server.route(options);
 };
-

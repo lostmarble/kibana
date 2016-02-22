@@ -1,3 +1,5 @@
+'use strict';
+
 var SetupError = require('./setup_error');
 var format = require('util').format;
 module.exports = function (server) {
@@ -14,7 +16,8 @@ module.exports = function (server) {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1
+        number_of_shards: 1,
+        number_of_replicas: 1
       },
       mappings: {
         config: {
@@ -27,13 +30,10 @@ module.exports = function (server) {
         }
       }
     }
-  })
-  .catch(handleError('Unable to create Kibana index "<%= kibana.index %>"'))
-  .then(function () {
+  })['catch'](handleError('Unable to create Kibana index "<%= kibana.index %>"')).then(function () {
     return client.cluster.health({
       waitForStatus: 'yellow',
       index: index
-    })
-    .catch(handleError('Waiting for Kibana index "<%= kibana.index %>" to come online failed.'));
+    })['catch'](handleError('Waiting for Kibana index "<%= kibana.index %>" to come online failed.'));
   });
 };

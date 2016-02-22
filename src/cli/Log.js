@@ -1,16 +1,20 @@
-let _ = require('lodash');
-let ansicolors = require('ansicolors');
+'use strict';
 
-let log = _.restParam(function (color, label, rest1) {
-  console.log.apply(console, [color(` ${_.trim(label)} `)].concat(rest1));
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _ = require('lodash');
+var ansicolors = require('ansicolors');
+
+var log = _.restParam(function (color, label, rest1) {
+  console.log.apply(console, [color(' ' + _.trim(label) + ' ')].concat(rest1));
 });
 
-let color = require('./color');
+var color = require('./color');
 
-module.exports = class Log {
-  constructor(quiet, silent) {
-    this.good = quiet || silent ? _.noop : _.partial(log, color.green);
-    this.warn = quiet || silent ? _.noop : _.partial(log, color.yellow);
-    this.bad = silent ? _.noop : _.partial(log, color.red);
-  }
+module.exports = function Log(quiet, silent) {
+  _classCallCheck(this, Log);
+
+  this.good = quiet || silent ? _.noop : _.partial(log, color.green);
+  this.warn = quiet || silent ? _.noop : _.partial(log, color.yellow);
+  this.bad = silent ? _.noop : _.partial(log, color.red);
 };

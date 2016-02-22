@@ -1,29 +1,30 @@
+'use strict';
+
+var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
+
 function toPojo(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
 function replacer(match, group) {
-  return (new Array(group.length + 1).join('X'));
+  return new Array(group.length + 1).join('X');
 }
 
 function apply(obj, key, action) {
-  for (let k in obj)  {
+  for (var k in obj) {
     if (obj.hasOwnProperty(k)) {
-      let val = obj[k];
+      var val = obj[k];
       if (k === key) {
         if (action === 'remove') {
           delete obj[k];
-        }
-        else if (action === 'censor' && typeof val === 'object') {
+        } else if (action === 'censor' && typeof val === 'object') {
           delete obj[key];
-        }
-        else if (action === 'censor') {
+        } else if (action === 'censor') {
           obj[k] = ('' + val).replace(/./g, 'X');
-        }
-        else if (/\/.+\//.test(action)) {
+        } else if (/\/.+\//.test(action)) {
           var matches = action.match(/\/(.+)\//);
           if (matches) {
-            let regex = new RegExp(matches[1]);
+            var regex = new RegExp(matches[1]);
             obj[k] = ('' + val).replace(regex, replacer);
           }
         }
@@ -36,7 +37,7 @@ function apply(obj, key, action) {
 }
 
 module.exports = function (obj, actionsByKey) {
-  return Object.keys(actionsByKey).reduce((output, key) => {
+  return _Object$keys(actionsByKey).reduce(function (output, key) {
     return apply(output, key, actionsByKey[key]);
   }, toPojo(obj));
 };

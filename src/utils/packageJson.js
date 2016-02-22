@@ -1,4 +1,9 @@
-var { join } = require('path');
+'use strict';
+
+var _require = require('path');
+
+var join = _require.join;
+
 var existsSync = require('fs').existsSync;
 
 var packageDir;
@@ -15,7 +20,6 @@ while (!packagePath || !existsSync(packagePath)) {
     throw new Error('unable to find package.json');
   }
 }
-
 
 module.exports = require(packagePath);
 module.exports.__filename = packagePath;

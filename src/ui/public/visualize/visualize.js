@@ -1,12 +1,10 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
-    require('ui/visualize/visualize_legend');
-
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
@@ -42,34 +40,26 @@ define(function (require) {
         }
 
         var getVisEl = getter('.visualize-chart');
-        var getVisContainer = getter('.vis-container');
-
-        // Show no results message when isZeroHits is true and it requires search
-        $scope.showNoResultsMessage = function () {
-          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-          var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-          var shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
-
-          return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
-        };
+        var getSpyEl = getter('visualize-spy');
 
         $scope.fullScreenSpy = false;
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         var applyClassNames = function () {
-          var $visEl = getVisContainer();
+          var $spyEl = getSpyEl();
+          var $visEl = getVisEl();
           var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
-          $visEl.toggleClass('spy-only', Boolean(fullSpy));
+          // external
+          $el.toggleClass('only-visualization', !$scope.spy.mode);
+          $el.toggleClass('visualization-and-spy', $scope.spy.mode && !fullSpy);
+          $el.toggleClass('only-spy', Boolean(fullSpy));
+          if ($spyEl) $spyEl.toggleClass('only', Boolean(fullSpy));
 
-          // Basically a magic number, chart must be at least this big or only the spy will show
-          var visTooSmall = 100;
-          $timeout(function () {
-            if ($visEl.height() < visTooSmall) {
-              $visEl.addClass('spy-only');
-            };
-          }, 0);
+          // internal
+          $visEl.toggleClass('spy-visible', Boolean($scope.spy.mode));
+          $visEl.toggleClass('spy-only', Boolean(fullSpy));
         };
 
         // we need to wait for some watchers to fire at least once
@@ -123,7 +113,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

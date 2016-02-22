@@ -1,12 +1,20 @@
-let _ = require('lodash');
-let Squeeze = require('good-squeeze').Squeeze;
-let writeStr = require('fs').createWriteStream;
+'use strict';
 
-let LogFormatJson = require('./LogFormatJson');
-let LogFormatString = require('./LogFormatString');
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-module.exports = class KbnLogger {
-  constructor(events, config) {
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _ = require('lodash');
+var Squeeze = require('good-squeeze').Squeeze;
+var writeStr = require('fs').createWriteStream;
+
+var LogFormatJson = require('./LogFormatJson');
+var LogFormatString = require('./LogFormatString');
+
+module.exports = (function () {
+  function KbnLogger(events, config) {
+    _classCallCheck(this, KbnLogger);
+
     this.squeeze = new Squeeze(events);
     this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
 
@@ -20,15 +28,21 @@ module.exports = class KbnLogger {
     }
   }
 
-  init(readstream, emitter, callback) {
+  _createClass(KbnLogger, [{
+    key: 'init',
+    value: function init(readstream, emitter, callback) {
+      var _this = this;
 
-    this.output = readstream.pipe(this.squeeze).pipe(this.format);
-    this.output.pipe(this.dest);
+      this.output = readstream.pipe(this.squeeze).pipe(this.format);
+      this.output.pipe(this.dest);
 
-    emitter.on('stop', () => {
-      this.output.unpipe(this.dest);
-    });
+      emitter.on('stop', function () {
+        _this.output.unpipe(_this.dest);
+      });
 
-    callback();
-  }
-};
+      callback();
+    }
+  }]);
+
+  return KbnLogger;
+})();

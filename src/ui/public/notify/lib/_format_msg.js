@@ -8,7 +8,7 @@ define(function (require) {
    * @param  {String} from - Prefix for message indicating source (optional)
    * @returns {string}
    */
-  function formatMsg(err, from) {
+  return function formatMsg(err, from) {
     var rtn = '';
     if (from) {
       rtn += from + ': ';
@@ -21,18 +21,9 @@ define(function (require) {
     } else if (esMsg) {
       rtn += esMsg;
     } else if (err instanceof Error) {
-      rtn += formatMsg.describeError(err);
+      rtn += err.message;
     }
 
     return rtn;
   };
-
-  formatMsg.describeError = function (err) {
-    if (!err) return undefined;
-    if (err.body && err.body.message) return err.body.message;
-    if (err.message) return err.message;
-    return '' + err;
-  };
-
-  return formatMsg;
 });

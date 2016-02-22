@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var util = require('util');
 
@@ -15,4 +17,3 @@ function SetupError(server, template, err) {
 }
 util.inherits(SetupError, Error);
 module.exports = SetupError;
-

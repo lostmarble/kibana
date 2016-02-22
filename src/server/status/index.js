@@ -1,7 +1,12 @@
+'use strict';
+
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var ServerStatus = require('./ServerStatus');
-  var { join } = require('path');
+
+  var _require = require('path');
+
+  var join = _require.join;
 
   kbnServer.status = new ServerStatus(kbnServer.server);
 
@@ -12,7 +17,7 @@ module.exports = function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/api/status',
-    handler: function (request, reply) {
+    handler: function handler(request, reply) {
       return reply({
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
@@ -30,7 +35,7 @@ module.exports = function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/status',
-    handler: function (request, reply) {
+    handler: function handler(request, reply) {
       return reply.renderStatusPage();
     }
   });

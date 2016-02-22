@@ -14,8 +14,8 @@ define(function (require) {
       }
     }
 
-    TemplateVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-      return new TemplateRenderbot(vis, $el, uiState);
+    TemplateVisType.prototype.createRenderbot = function (vis, $el) {
+      return new TemplateRenderbot(vis, $el);
     };
 
     return TemplateVisType;

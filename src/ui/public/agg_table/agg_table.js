@@ -13,8 +13,7 @@ define(function (require) {
       template: require('ui/agg_table/agg_table.html'),
       scope: {
         table: '=',
-        perPage: '=?',
-        exportTitle: '=?'
+        perPage: '=?'
       },
       controllerAs: 'aggTable',
       compile: function ($el) {
@@ -76,7 +75,7 @@ define(function (require) {
             return;
           }
 
-          self.csv.filename = ($scope.exportTitle || table.title() || 'table') + '.csv';
+          self.csv.filename = (table.title() || 'table') + '.csv';
           $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
             var agg = $scope.table.aggConfig(col);

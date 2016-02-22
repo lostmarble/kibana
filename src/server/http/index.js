@@ -1,16 +1,16 @@
-module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
+'use strict';
 
-  let getDefaultRoute = require('./getDefaultRoute');
+module.exports = function (kbnServer, server, config) {
+  var _ = require('lodash');
+  var fs = require('fs');
+  var Boom = require('boom');
+  var Hapi = require('hapi');
+  var parse = require('url').parse;
+  var format = require('url').format;
+
+  var getDefaultRoute = require('./getDefaultRoute');
 
   server = kbnServer.server = new Hapi.Server();
-
-  const shortUrlLookup = require('./short_url_lookup')(server);
 
   // Create a new connection
   var connectionOptions = {
@@ -32,29 +32,7 @@ module.exports = function (kbnServer, server, config) {
       // The default ciphers in node 0.12.x include insecure ciphers, so until
       // we enforce a more recent version of node, we craft our own list
       // @see https://github.com/nodejs/node/blob/master/src/node_constants.h#L8-L28
-      ciphers: [
-        'ECDHE-RSA-AES128-GCM-SHA256',
-        'ECDHE-ECDSA-AES128-GCM-SHA256',
-        'ECDHE-RSA-AES256-GCM-SHA384',
-        'ECDHE-ECDSA-AES256-GCM-SHA384',
-        'DHE-RSA-AES128-GCM-SHA256',
-        'ECDHE-RSA-AES128-SHA256',
-        'DHE-RSA-AES128-SHA256',
-        'ECDHE-RSA-AES256-SHA384',
-        'DHE-RSA-AES256-SHA384',
-        'ECDHE-RSA-AES256-SHA256',
-        'DHE-RSA-AES256-SHA256',
-        'HIGH',
-        '!aNULL',
-        '!eNULL',
-        '!EXPORT',
-        '!DES',
-        '!RC4',
-        '!MD5',
-        '!PSK',
-        '!SRP',
-        '!CAMELLIA'
-      ].join(':'),
+      ciphers: ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-ECDSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384', 'ECDHE-ECDSA-AES256-GCM-SHA384', 'DHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES128-SHA256', 'DHE-RSA-AES128-SHA256', 'ECDHE-RSA-AES256-SHA384', 'DHE-RSA-AES256-SHA384', 'ECDHE-RSA-AES256-SHA256', 'DHE-RSA-AES256-SHA256', 'HIGH', '!aNULL', '!eNULL', '!EXPORT', '!DES', '!RC4', '!MD5', '!PSK', '!SRP', '!CAMELLIA'].join(':'),
       // We use the server's cipher order rather than the client's to prevent
       // the BEAST attack
       honorCipherOrder: true
@@ -75,7 +53,7 @@ module.exports = function (kbnServer, server, config) {
           lookupCompressed: true
         }
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -87,7 +65,7 @@ module.exports = function (kbnServer, server, config) {
       handler: {
         file: filePath
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -104,10 +82,10 @@ module.exports = function (kbnServer, server, config) {
     this.route({
       path: route,
       method: 'GET',
-      handler: function (req, reply) {
+      handler: function handler(req, reply) {
         return reply.redirect(format({
           search: req.url.search,
-          pathname: req.url.pathname + '/',
+          pathname: req.url.pathname + '/'
         }));
       }
     });
@@ -115,26 +93,26 @@ module.exports = function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    var response = req.response;
 
     if (response.isBoom) {
-      response.output.headers['kbn-name'] = kbnServer.name;
-      response.output.headers['kbn-version'] = kbnServer.version;
+      response.output.headers['x-app-name'] = kbnServer.name;
+      response.output.headers['x-app-version'] = kbnServer.version;
     } else {
-      response.header('kbn-name', kbnServer.name);
-      response.header('kbn-version', kbnServer.version);
+      response.header('x-app-name', kbnServer.name);
+      response.header('x-app-version', kbnServer.version);
     }
 
-    return reply.continue();
+    return reply['continue']();
   });
 
   server.route({
     path: '/',
     method: 'GET',
-    handler: function (req, reply) {
+    handler: function handler(req, reply) {
       return reply.view('rootRedirect', {
-        hashRoute: `${config.get('server.basePath')}/app/kibana`,
-        defaultRoute: getDefaultRoute(kbnServer),
+        hashRoute: config.get('server.basePath') + '/app/kibana',
+        defaultRoute: getDefaultRoute(kbnServer)
       });
     }
   });
@@ -142,35 +120,16 @@ module.exports = function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function (req, reply) {
-      let path = req.path;
+    handler: function handler(req, reply) {
+      var path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
 
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
-      }))
-      .permanent(true);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/goto/{urlId}',
-    handler: async function (request, reply) {
-      const url = await shortUrlLookup.getUrl(request.params.urlId);
-      reply().redirect(url);
-    }
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/shorten',
-    handler: async function (request, reply) {
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
-      reply(urlId);
+        pathname: path.slice(0, -1)
+      })).permanent(true);
     }
   });
 

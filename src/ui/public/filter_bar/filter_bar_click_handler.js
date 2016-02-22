@@ -2,11 +2,21 @@ define(function (require) {
   var _ = require('lodash');
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
-  var findByParam = require('ui/utils/find_by_param');
+
+  // given an object or array of objects, return the value of the passed param
+  // if the param is missing, return undefined
+  function findByParam(values, param) {
+    if (_.isArray(values)) { // point series chart
+      var index = _.findIndex(values, param);
+      if (index === -1) return;
+      return values[index][param];
+    }
+    return values[param]; // pie chart
+  }
 
   return function (Notifier) {
     return function ($state) {
-      return function (event, simulate) {
+      return function (event) {
         var notify = new Notifier({
           location: 'Filter bar'
         });
@@ -48,20 +58,9 @@ define(function (require) {
 
           if (!filters.length) return;
 
-          if (event.negate) {
-            _.each(filters, function (filter) {
-              filter.meta = filter.meta || {};
-              filter.meta.negate = true;
-            });
-          }
-
           filters = dedupFilters($state.filters, uniqFilters(filters));
           // We need to add a bunch of filter deduping here.
-          if (!simulate) {
-            $state.$newFilters = filters;
-          }
-
-          return filters;
+          $state.$newFilters = filters;
         }
       };
     };

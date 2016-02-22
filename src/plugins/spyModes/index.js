@@ -1,10 +1,9 @@
+'use strict';
+
 module.exports = function (kibana) {
   return new kibana.Plugin({
     uiExports: {
-      spyModes: [
-        'plugins/spyModes/tableSpyMode',
-        'plugins/spyModes/reqRespStatsSpyMode'
-      ]
+      spyModes: ['plugins/spyModes/tableSpyMode', 'plugins/spyModes/reqRespStatsSpyMode']
     }
   });
 };

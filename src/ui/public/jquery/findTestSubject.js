@@ -1,5 +1,3 @@
-var testSubjSelector = require('@spalger/test-subj-selector');
-
 module.exports = function bindToJquery($) {
 
   /**
@@ -43,12 +41,28 @@ module.exports = function bindToJquery($) {
    */
   $.fn.findTestSubject = findTestSubject;
 
-  function findTestSubject(...subjectSelectors) {
+  function findTestSubject(/* ...subjectSelectors */) {
+    var subjectSelectors = [].slice.apply(arguments);
     var $els = $();
     var $context = this;
 
-    subjectSelectors.forEach(function (selector) {
-      $els = $els.add($context.find(testSubjSelector(selector)));
+    subjectSelectors.forEach(function (subjectSelector) {
+      var cssSelectors = [];
+      var terms = subjectSelector
+        .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
+        .split(/\s+/);
+
+      function termToCssSelector(term) {
+        return term ? '[data-test-subj~="' + term + '"]' : '';
+      }
+
+      while (terms.length) {
+        var term = terms.shift();
+        // split each term by joins/& and map to css selectors
+        cssSelectors.push(term.split('&').map(termToCssSelector).join(''));
+      }
+
+      $els = $els.add($context.find(cssSelectors.join(' ')));
     });
 
     return $els;

@@ -9,5 +9,4 @@ define(function (require) {
   fieldFormats.register(require('ui/stringify/types/String'));
   fieldFormats.register(require('ui/stringify/types/Source'));
   fieldFormats.register(require('ui/stringify/types/Color'));
-  fieldFormats.register(require('ui/stringify/types/truncate'));
 });

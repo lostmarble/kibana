@@ -1,23 +1,28 @@
-import { badRequest } from 'boom';
+'use strict';
 
-export default function (kbnServer, server, config) {
-  const version = config.get('pkg.version');
-  const disabled = config.get('server.xsrf.disableProtection');
-  const header = 'kbn-version';
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _boom = require('boom');
+
+exports['default'] = function (kbnServer, server, config) {
+  var token = config.get('server.xsrf.token');
+  var disabled = config.get('server.xsrf.disableProtection');
+
+  server.decorate('reply', 'issueXsrfToken', function () {
+    return token;
+  });
 
   server.ext('onPostAuth', function (req, reply) {
-    const noHeaderGet = req.method === 'get' && !req.headers[header];
-    if (disabled || noHeaderGet) return reply.continue();
+    if (disabled || req.method === 'get') return reply['continue']();
 
-    const submission = req.headers[header];
-    if (!submission) return reply(badRequest(`Missing ${header} header`));
-    if (submission !== version) {
-      return reply(badRequest('Browser client is out of date, please refresh the page', {
-        expected: version,
-        got: submission
-      }));
-    }
+    var attempt = req.headers['kbn-xsrf-token'];
+    if (!attempt) return reply((0, _boom.forbidden)('Missing XSRF token'));
+    if (attempt !== token) return reply((0, _boom.forbidden)('Invalid XSRF token'));
 
-    return reply.continue();
+    return reply['continue']();
   });
-}
+};
+
+module.exports = exports['default'];

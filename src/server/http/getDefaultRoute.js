@@ -1,10 +1,14 @@
-let _ = require('lodash');
+'use strict';
+
+var _ = require('lodash');
 
 module.exports = _.once(function (kbnServer) {
-  const { uiExports, config } = kbnServer;
+  var uiExports = kbnServer.uiExports;
+  var config = kbnServer.config;
+
   // user configured default route
-  let defaultConfig = config.get('server.defaultRoute');
+  var defaultConfig = config.get('server.defaultRoute');
   if (defaultConfig) return defaultConfig;
 
-  return `${config.get('server.basePath')}/app/kibana`;
+  return config.get('server.basePath') + '/app/kibana';
 });
